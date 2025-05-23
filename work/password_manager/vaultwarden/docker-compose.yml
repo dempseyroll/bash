@@ -36,6 +36,7 @@ services:
       - SMTP_FROM_NAME=${SMTP_FROM_NAME}
       - SMTP_USERNAME=${SMTP_USERNAME}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - ENABLE_TOTP=true
       - ORG_TWOFA_ENFORCE=true 
     labels:
       - "traefik.enable=true"
