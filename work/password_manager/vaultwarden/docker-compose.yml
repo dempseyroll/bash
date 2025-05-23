@@ -1,0 +1,61 @@
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: always
+    command:
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=YOUR_EMAIL"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik/acme.json:/letsencrypt/acme.json"
+    networks:
+      - web
+
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: always
+    environment:
+      - DOMAIN=https://YOUR_DOMAIN
+      - WEBSOCKET_ENABLED=true
+      - ADMIN_TOKEN=${VAULTWARDEN_ADMIN_TOKEN}
+      - SIGNUPS_ALLOWED=false
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURITY=${SMTP_SECURITY}
+      - SMTP_FROM=${SMTP_FROM}
+      - SMTP_FROM_NAME=${SMTP_FROM_NAME}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - ORG_TWOFA_ENFORCE=true 
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vault.rule=Host(`YOUR_DOMAIN`)"
+      - "traefik.http.routers.vault.entrypoints=websecure"
+      - "traefik.http.routers.vault.tls.certresolver=myresolver"
+      - "traefik.http.services.vault.loadbalancer.server.port=80"
+      - "traefik.http.routers.vault.middlewares=default-headers"
+      - "traefik.http.middlewares.default-headers.headers.stsSeconds=63072000"
+      - "traefik.http.middlewares.default-headers.headers.browserXssFilter=true"
+      - "traefik.http.middlewares.default-headers.headers.contentTypeNosniff=true"
+    volumes:
+      - vaultwarden-data:/data
+    networks:
+      - web
+
+volumes:
+  vaultwarden-data:
+
+networks:
+  web:
+    external: false
+
