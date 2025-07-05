@@ -1,0 +1,19 @@
+{
+  "Comment": "Agregar registro A para ENTORNO.DOMAIN",
+  "Changes": [
+    {
+      "Action": "CREATE",
+      "ResourceRecordSet": {
+        "Name": "ENTORNO.DOMAIN.",
+        "Type": "A",
+        "TTL": 300,
+        "ResourceRecords": [
+          {
+            "Value": "CLIENT_IP"
+          }
+        ]
+      }
+    }
+  ]
+}
+

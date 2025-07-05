@@ -1,0 +1,14 @@
+---
+- name: Verificar filesystem en servidores remotos vía bastion
+  hosts: servidores
+  gather_facts: no
+  tasks:
+    - name: Consultar estado del filesystem
+      become: true
+      shell: df -hT /
+      register: filesystem
+
+    - name: Mostrar uso de filesystem
+      debug:
+        var: filesystem.stdout_lines
+
